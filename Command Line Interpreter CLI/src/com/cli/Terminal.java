@@ -1,5 +1,8 @@
 package com.cli;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Scanner;
@@ -21,6 +24,7 @@ class Parser {
         this.commandName = subInput[0];
         if(subInput.length > 1)
         {
+            args=new String[subInput.length-1];
             for(int i = 1; i< subInput.length;i++)
             {
                 args[i-1] = subInput[i];
@@ -32,6 +36,17 @@ class Parser {
         }
         else if(commandName.equals("exit") && args == null)
         {
+            return true;
+        }
+        else if(commandName.equals("cd"))
+        {
+            if(args == null) {
+                return true;
+            }
+            else if(args.length > 1)
+            {
+                return false;
+            }
             return true;
         }
         else if(args == null && commandName.equals("history")){
@@ -58,11 +73,44 @@ public class Terminal {
     Parser parser;
     static Scanner scanner = new Scanner (System.in);
     static String input;
+    static Path currentPath = Paths.get(System.getProperty("user.dir"));
 
 
     //----------------------------------------------------------------------------------------------------------------------
     public String pwd(){
         return System.getProperty("user.dir");
+    }
+    public void cd(String[] args){
+        if(args==null)
+        {
+            currentPath = Path.of(System.getProperty("user.home"));
+        }
+
+        else {
+            if(args[0].equals(".."))
+            {
+                if(currentPath.getParent() != null){
+                    currentPath = currentPath.getParent();
+                }
+                this.parser.args = null;
+                return;
+            }
+            Path path = Paths.get(args[0]);
+
+            if(!path.isAbsolute())
+            {
+                path = Paths.get(currentPath.toString(), path.toString()).normalize();
+            }
+
+            if(Files.exists(path)){
+                currentPath = path;
+            }
+            else {
+                System.out.println("Invalid directory");
+            }
+        }
+        this.parser.args = null;
+
     }
     //----------------------------------------------------------------------------------------------------------------------
     //----------------------------------------------------------------------------------------------------------------------
@@ -73,7 +121,7 @@ public class Terminal {
         parser = new Parser();
 
         while (true) {
-            System.out.print(">");
+            System.out.print(currentPath+">");
             input = scanner.nextLine();
 
             if (parser.parse(input)) {
@@ -88,6 +136,10 @@ public class Terminal {
                     for (String command : History){
                         System.out.println(counter++ + " " + command);
                     }
+                }
+                else if(parser.getCommandName().equals("cd"))
+                {
+                    this.cd(parser.getArgs());
                 }
             }
             else {
