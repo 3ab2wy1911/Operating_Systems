@@ -152,10 +152,12 @@ public class Terminal {
                 if (parser.getCommandName().equals("pwd")) {
                     System.out.println(pwd());
                     History.add("pwd"); // add that command to the history
-                } else if (parser.getCommandName().equals("exit")) {
+                }
+                else if (parser.getCommandName().equals("exit")) {
                     System.exit(0);
                     // add that command to the history
-                } else if (parser.getCommandName().equals("history")){
+                }
+                else if (parser.getCommandName().equals("history")){
                     int counter = 1;
                     for (String command : History){
                         System.out.println(counter++ + " " + command);
