@@ -116,22 +116,17 @@ public class Terminal {
     public void cat(String filename) throws IOException {
         Path fullPath = currentPath.resolve(filename);
         if (Files.exists(fullPath)){
-            if (filename.endsWith(".txt")){
-                try{
-                    StringBuilder content = new StringBuilder();
-                    File f = new File(filename);
-                    Scanner sc = new Scanner(f);
-                    while(sc.hasNextLine()){
-                        content.append(sc.nextLine()).append('\n');
-                    }
-                    System.out.println(content);
+            try{
+                StringBuilder content = new StringBuilder();
+                File f = new File(filename);
+                Scanner sc = new Scanner(f);
+                while(sc.hasNextLine()){
+                    content.append(sc.nextLine()).append('\n');
                 }
-                catch(IOException exception) {
-                    System.out.println("Error Opening the file");
-                }
+                System.out.println(content);
             }
-            else {
-                System.out.println(" ");
+            catch(IOException exception) {
+                System.out.println("Error Opening the file");
             }
         }
         else {
@@ -139,7 +134,30 @@ public class Terminal {
         }
     }
     //----------------------------------------------------------------------------------------------------------------------
-
+    public void cat(String filename1, String filename2) throws IOException{
+        Path fullPath1 = currentPath.resolve(filename1); // store the path of the first file
+        Path fullPath2 = currentPath.resolve(filename2); // store the path of the second file
+        if (Files.exists(fullPath1) && Files.exists(fullPath2)){
+            try {
+                File f = new File(filename1);
+                Scanner sc = new Scanner(f);
+                while(sc.hasNextLine()){
+                    System.out.println(sc.nextLine());
+                }
+                f = new File(filename2);
+                sc = new Scanner(f);
+                while(sc.hasNextLine()){
+                    System.out.println(sc.nextLine());
+                }
+            }
+            catch(IOException exception){
+                System.out.println("Error Opening File!");
+            }
+        }
+        else {
+            System.out.println("No Such file in directory");
+        }
+    }
     // This method will choose the suitable command method to be called
     public void chooseCommandAction() throws IOException {
 
@@ -172,7 +190,10 @@ public class Terminal {
                         cat(parser.getArgs()[0]);
                         History.add("cat "+parser.getArgs()[0]);
                     }
-                    //else if (parser.getArgs().length == 2) cat(parser.getArgs()[0], parser.getArgs()[1]);
+                    else if (parser.getArgs().length == 2) {
+                        cat(parser.getArgs()[0], parser.getArgs()[1]);
+                        History.add("cat "+parser.getArgs()[1] + ' ' + parser.getArgs()[1]);
+                    }
                     else System.out.println("More than 2 parameters!");
                 }
                 else System.out.println("Invalid command");
