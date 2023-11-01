@@ -1,10 +1,11 @@
 package com.cli;
 
+import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Scanner;
 /*
 Subject : Operating Systems Assignment 1 FCAI-CU
@@ -43,13 +44,12 @@ class Parser {
             if(args == null) {
                 return true;
             }
-            else if(args.length > 1)
-            {
-                return false;
-            }
-            return true;
+            else return args.length <= 1;
         }
         else if(args == null && commandName.equals("history")){
+            return true;
+        }
+        else if (commandName.equals("cat") && args != null){
             return true;
         }
         else return false;
@@ -113,15 +113,39 @@ public class Terminal {
 
     }
     //----------------------------------------------------------------------------------------------------------------------
+    public void cat(String filename) throws IOException {
+        Path fullPath = currentPath.resolve(filename);
+        if (Files.exists(fullPath)){
+            if (filename.endsWith(".txt")){
+                try{
+                    StringBuilder content = new StringBuilder();
+                    File f = new File(filename);
+                    Scanner sc = new Scanner(f);
+                    while(sc.hasNextLine()){
+                        content.append(sc.nextLine()).append('\n');
+                    }
+                    System.out.println(content);
+                }
+                catch(IOException exception) {
+                    System.out.println("Error Opening the file");
+                }
+            }
+            else {
+                System.out.println(" ");
+            }
+        }
+        else {
+            System.out.println("No Such file in directory");
+        }
+    }
     //----------------------------------------------------------------------------------------------------------------------
 
     // This method will choose the suitable command method to be called
-    public void chooseCommandAction(){
-
-        parser = new Parser();
+    public void chooseCommandAction() throws IOException {
 
         while (true) {
-            System.out.print(currentPath+">");
+            parser = new Parser();
+            System.out.print(currentPath+"\n>");
             input = scanner.nextLine();
 
             if (parser.parse(input)) {
@@ -141,6 +165,15 @@ public class Terminal {
                 {
                     this.cd(parser.getArgs());
                 }
+                else if (parser.getCommandName().equals("cat")){
+                    if (parser.getArgs().length == 1) {
+                        cat(parser.getArgs()[0]);
+                        History.add("cat "+parser.getArgs()[0]);
+                    }
+                    //else if (parser.getArgs().length == 2) cat(parser.getArgs()[0], parser.getArgs()[1]);
+                    else System.out.println("More than 2 parameters!");
+                }
+                else System.out.println("Invalid command");
             }
             else {
                 System.out.println("Invalid command");
@@ -156,7 +189,7 @@ public class Terminal {
 
 //----------------------------------------------------------------------------------------------------------------------
 
-    public static void main(String[] args){
+    public static void main(String[] args) throws IOException {
 //        // Call the function that will manage the Interpreter.
         Terminal terminal = new Terminal ();
         terminal.chooseCommandAction();
