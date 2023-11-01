@@ -84,8 +84,9 @@ public class Terminal {
                     System.exit(0);
                     // add that command to the history
                 } else if (parser.getCommandName().equals("history")){
+                    int counter = 1;
                     for (String command : History){
-                        System.out.println(command);
+                        System.out.println(counter++ + " " + command);
                     }
                 }
             }
