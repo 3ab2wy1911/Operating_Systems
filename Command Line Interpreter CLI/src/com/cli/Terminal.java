@@ -1,5 +1,6 @@
 package com.cli;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Scanner;
 /*
@@ -33,9 +34,10 @@ class Parser {
         {
             return true;
         }
-        else {
-            return false;
+        else if(args == null && commandName.equals("history")){
+            return true;
         }
+        else return false;
     }
     //----------------------------------------------------------------------------------------------------------------------
     public String getCommandName(){
@@ -52,17 +54,18 @@ class Parser {
 //======================================================================================================================
 
 public class Terminal {
+    ArrayList<String> History = new ArrayList<>(); // Every correct command will be added to the history
     Parser parser;
     static Scanner scanner = new Scanner (System.in);
     static String input;
 
 
-//----------------------------------------------------------------------------------------------------------------------
-public String pwd(){
-    return System.getProperty("user.dir");
-}
-//----------------------------------------------------------------------------------------------------------------------
-//----------------------------------------------------------------------------------------------------------------------
+    //----------------------------------------------------------------------------------------------------------------------
+    public String pwd(){
+        return System.getProperty("user.dir");
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    //----------------------------------------------------------------------------------------------------------------------
 
     // This method will choose the suitable command method to be called
     public void chooseCommandAction(){
@@ -76,8 +79,14 @@ public String pwd(){
             if (parser.parse(input)) {
                 if (parser.getCommandName().equals("pwd")) {
                     System.out.println(pwd());
+                    History.add("pwd"); // add that command to the history
                 } else if (parser.getCommandName().equals("exit")) {
                     System.exit(0);
+                    // add that command to the history
+                } else if (parser.getCommandName().equals("history")){
+                    for (String command : History){
+                        System.out.println(command);
+                    }
                 }
             }
             else {
