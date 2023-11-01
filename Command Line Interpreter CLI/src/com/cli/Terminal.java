@@ -8,7 +8,7 @@ import java.util.Arrays;
 import java.util.Scanner;
 /*
 Subject : Operating Systems Assignment 1 FCAI-CU
-Callobrators: Mohamed Ahmed Abd El-Kawy , Omar Mohammed Fayek , Badr Mohamed Ragab , Ahmed Gehad Ahmed. NB : Fe Asmaa Ana Ma2lfha 3adloha we b3d kda ams7o el comment da.
+Callobrators: Mohamed Ahmed Abd El-Kawy , Omar Mohamed Fayek , Badr Mohamed Ragab , Ahmed Gehad Ahmed. NB : Fe Asmaa Ana Ma2lfha 3adloha we b3d kda ams7o el comment da.
 Beginning Date : 28 - 10 - 2023
 Ending Date :
 */
@@ -69,8 +69,8 @@ class Parser {
 //======================================================================================================================
 
 public class Terminal {
-    ArrayList<String> History = new ArrayList<>(); // Every correct command will be added to the history
     Parser parser;
+    ArrayList<String> History = new ArrayList<>(); // Every correct command will be added to the history
     static Scanner scanner = new Scanner (System.in);
     static String input;
     static Path currentPath = Paths.get(System.getProperty("user.dir"));
