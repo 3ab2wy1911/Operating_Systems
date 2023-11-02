@@ -7,19 +7,26 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.*;
+import java.util.ArrayList;
+import java.util.Scanner;
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
+
 /*
 Subject : Operating Systems Assignment 1 FCAI-CU
 Collaborators: Mohamed Ahmed Abd El-Kawy , Omar Mohamed Fayek , Badr Mohamed Ragab , Ahmed Gehad Ahmed. NB : Fe Asmaa Ana Ma2lfha 3adloha we b3d kda ams7o el comment da.
 Beginning Date : 28 - 10 - 2023
-Ending Date :
+Ending Date : 02 - 11 -2023
 */
 
 class Parser {
     private String commandName;
     private String [] args;
     private String input ;
+
     //----------------------------------------------------------------------------------------------------------------------
+
     //This method will divide the input into commandName and args
     //where "input" is the string command entered by the user
     public boolean parse(String input){
@@ -35,11 +42,10 @@ class Parser {
                 args[i-1] = subInput[i];
             }
         }
-//        System.out.println(commandName);
-//        if (args != null)
-//        for ( String arg : args)
-//            System.out.println(arg);
+
 //----------------------------------------------------------------------------------------------------------------------
+
+        // Checking the input of the user.
         if(commandName.equals("pwd") && args == null)
         {
             return true;
@@ -61,9 +67,6 @@ class Parser {
         else if (commandName.equals("cat") && args != null){
             return true;
         }
-
-        //----------------------------------------------------------------
-
         else if (commandName.equals("ls") &&( args == null || Objects.equals(args[0], "-r"))){
             return true;
         }
@@ -79,10 +82,23 @@ class Parser {
         else if (commandName.equals("echo") && args!= null){
             return true;
         }
-        //----------------------------------------------------------------
-        // Will Implement the rest here...
-        else return false;  // better to type return and the last condition...
+        else if(commandName.equals("cp") && !Objects.requireNonNull(args)[0].equals("-r"))
+        {
+            return args.length == 2;
+        }
+        else if(commandName.equals("cp"))
+        {
+            return args.length == 3;
+        }
+        else if (commandName.equals("mkdir") && args != null){
+            return true;
+        }
+        else if (commandName.equals("rmdir")){
+            return args != null;
+        }
+        else return commandName.equals("rm");
     }
+
     //----------------------------------------------------------------------------------------------------------------------
     public String getCommandName(){
         return commandName;
@@ -107,16 +123,20 @@ class Parser {
 
 public class Terminal {
     private Parser parser;
-    private ArrayList<String> History = new ArrayList<>(); // Every correct command will be added to the history
-    private static Scanner scanner = new Scanner (System.in);
+    private final ArrayList<String> History = new ArrayList<>(); // Every correct command will be added to the history
+    private static final Scanner scanner = new Scanner (System.in);
     private static String input;
     private static Path currentPath = Paths.get(System.getProperty("user.dir"));
 
 
 //----------------------------------------------------------------------------------------------------------------------
+
     public String pwd(){
-        return System.getProperty("user.dir");
+        return System.getProperty(currentPath.toString());
     }
+
+//----------------------------------------------------------------------------------------------------------------------
+
     public void cd(String[] args){
         if(args==null)
         {
@@ -149,7 +169,71 @@ public class Terminal {
         this.parser.setArgs(null);
 
     }
+
 //----------------------------------------------------------------------------------------------------------------------
+
+    public static void ensureAbsolutePaths(Path filePath, String args) {
+        if (!filePath.isAbsolute()) {
+            filePath = Paths.get(currentPath.toString(), args);
+     }
+    }
+
+//----------------------------------------------------------------------------------------------------------------------
+public void cp(String[] args) throws IOException {
+    Path file1 =  Path.of(args[0]);
+    Path file2 = Path.of(args[1]);
+    ensureAbsolutePaths(file1, args[0]);
+    ensureAbsolutePaths(file2, args[1]);
+    try{
+        if(Files.exists(file1)) {
+            File file = new File(file2.toString());
+            file.createNewFile();
+            if(Files.exists(file2))
+            {
+                Files.copy(file1, file2, REPLACE_EXISTING);
+            }
+            else {
+                System.out.println("Enter a Valid Destination File Name");
+            }
+
+        }
+        else {
+            System.out.println("Enter a Valid Source File Name");
+        }
+    }
+    catch (IOException e)
+    {
+        System.out.println("Error in Copying File " + e);
+    }
+    this.parser.setArgs(null);
+}
+
+//----------------------------------------------------------------------------------------------------------------------
+
+    public void cp_r(String[] args) {
+        Path folder1 =  Path.of(args[1]);
+        Path folder2 = Path.of(args[2]);
+        ensureAbsolutePaths(folder1, args[1]);
+        ensureAbsolutePaths(folder2, args[2]);
+        try {
+            Files.walk(folder1).forEach(s->
+                    {
+                        try {
+                            Files.copy(s, folder2.resolve(folder1.relativize(s)), StandardCopyOption.REPLACE_EXISTING);
+
+                        } catch (IOException e) {
+                            System.out.println(e);
+                        }
+                    }
+            );
+        }catch (IOException e) {
+            System.out.println(e);
+        }
+    }
+
+
+//----------------------------------------------------------------------------------------------------------------------
+
     public void cat(String filename) throws IOException {
         Path fullPath = currentPath.resolve(filename);
         if (Files.exists(fullPath)){
@@ -286,6 +370,98 @@ public void touch() throws IOException {
 
 //----------------------------------------------------------------------------------------------------------------------
 
+    public void makeDir(String[] arguments) throws IOException {
+        // windows the absolute path starts with [partition letter][:][\]
+        // linux the absolute path starts with '/'
+        boolean check = false;
+        Path newDirectory;
+        for (String directory : arguments){
+            char letter = directory.charAt(0);
+            // check if it absolute path
+            if (Character.isLetter(letter) && directory.charAt(1) == ':' && directory.charAt(2) == '\\'){
+                check = Paths.get(directory).isAbsolute();
+                if (check){
+                    newDirectory = Paths.get(directory);
+                    try{
+                        Files.createDirectory(newDirectory);
+                        break;
+                    }
+                    catch(IOException exception){
+                        System.out.println("Invalid Directory");
+                        return;
+                    }
+                }
+            }
+            else {
+                try {
+                    String validation = "\\\\/:*?\"<>|";
+                    if (!directory.matches(".*[" + validation + "].*")){
+                        newDirectory = currentPath.resolve(directory);
+                        if (Files.exists(newDirectory)){
+                            throw new Exception(directory + " already exists");
+                        }
+                        else Files.createDirectory(newDirectory);
+                    }
+                    else throw new Exception("Not a valid name");
+                }
+                catch (Exception exception){
+                    System.out.println(exception.getMessage());
+                }
+
+            }
+        }
+    }
+
+//----------------------------------------------------------------------------------------------------------------------
+    public void rmdir(){
+        String path = String.join(" ", parser.getArgs()); // Joining the args with the file separator.
+        File file = new File(path);
+
+        if (path.equals("*"))
+        {
+           File current = new File(".");
+           File[] files = current.listFiles();
+
+           if (files != null){
+               for (File f : files){
+                   if (f.isDirectory() && Objects.requireNonNull(f.list()).length == 0){
+                       if (f.delete()){
+                           System.out.println(f.getName() + " deleted successfully");
+                       }
+                   }
+               }
+           }
+        }
+        else {
+            if (!file.exists() || !file.isDirectory()){
+                System.out.println("Directory does not exist");
+                return;
+            }
+            if (file.delete()){
+                System.out.println(file.getName() + " deleted successfully");
+            }
+            else {
+                System.out.println("Failed to delete directory");
+            }
+        }
+    }
+//----------------------------------------------------------------------------------------------------------------------
+
+    public void remove(String filename) throws Exception{
+        try{
+            Path p = currentPath.resolve(filename);
+            if (Files.exists(p)){
+                Files.delete(p);
+            }
+            else throw new Exception();
+        }
+        catch (Exception exception){
+            System.out.println("No such file or directory");
+        }
+    }
+
+//----------------------------------------------------------------------------------------------------------------------
+
     public String help (){
         return """
                 echo    Takes 1 argument and prints it.
@@ -309,7 +485,7 @@ public void touch() throws IOException {
 
 
     // This method will choose the suitable command method to be called
-    public void chooseCommandAction() throws IOException {
+    public void chooseCommandAction() throws Exception {
 
         System.out.println(currentPath);
         while (true) {
@@ -328,7 +504,22 @@ public void touch() throws IOException {
                             System.out.println(filename);
                         }
                     }
+                    case "mkdir" -> makeDir(parser.getArgs());
+                    case "rmdir" -> rmdir();
                     case "touch" -> touch();
+                    case "cp" -> {
+                        if (!parser.getArgs()[0].equals("-r")) {
+                            this.cp(parser.getArgs());
+                        }
+                        else if (parser.getArgs()[0].equals("-r")){
+                            this.cp_r(parser.getArgs());
+                        }
+                    }
+                    case "rm" -> {
+                        if (parser.getArgs().length == 1){
+                            remove(parser.getArgs()[0]);
+                        }
+                    }
                     case "cat" -> {
                         if (parser.getArgs().length == 1) {
                             cat(parser.getArgs()[0]);
@@ -356,7 +547,7 @@ public void touch() throws IOException {
 
 //----------------------------------------------------------------------------------------------------------------------
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws Exception {
 //  Call the function that will manage the Interpreter.
         Terminal terminal = new Terminal ();
         terminal.chooseCommandAction();
