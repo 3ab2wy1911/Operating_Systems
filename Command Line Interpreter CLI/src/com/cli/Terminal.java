@@ -1,26 +1,30 @@
 package com.cli;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Scanner;
+import java.util.*;
 /*
 Subject : Operating Systems Assignment 1 FCAI-CU
-Callobrators: Mohamed Ahmed Abd El-Kawy , Omar Mohamed Fayek , Badr Mohamed Ragab , Ahmed Gehad Ahmed. NB : Fe Asmaa Ana Ma2lfha 3adloha we b3d kda ams7o el comment da.
+Collaborators: Mohamed Ahmed Abd El-Kawy , Omar Mohamed Fayek , Badr Mohamed Ragab , Ahmed Gehad Ahmed. NB : Fe Asmaa Ana Ma2lfha 3adloha we b3d kda ams7o el comment da.
 Beginning Date : 28 - 10 - 2023
 Ending Date :
 */
 
 class Parser {
-    String commandName;
-    String [] args;
+    private String commandName;
+    private String [] args;
+    private String input ;
     //----------------------------------------------------------------------------------------------------------------------
     //This method will divide the input into commandName and args
     //where "input" is the string command entered by the user
     public boolean parse(String input){
+        this.input = input;
+        // Removing the spaces from the string and then dividing it into command and args.
         String[] subInput = input.split("\\s");
         this.commandName = subInput[0];
         if(subInput.length > 1)
@@ -31,6 +35,11 @@ class Parser {
                 args[i-1] = subInput[i];
             }
         }
+//        System.out.println(commandName);
+//        if (args != null)
+//        for ( String arg : args)
+//            System.out.println(arg);
+//----------------------------------------------------------------------------------------------------------------------
         if(commandName.equals("pwd") && args == null)
         {
             return true;
@@ -52,7 +61,27 @@ class Parser {
         else if (commandName.equals("cat") && args != null){
             return true;
         }
-        else return false;
+
+        //----------------------------------------------------------------
+
+        else if (commandName.equals("ls") &&( args == null || Objects.equals(args[0], "-r"))){
+            return true;
+        }
+        else if (commandName.equals("touch") && args != null){
+            return true;
+        }
+        else if (commandName.equals("wc") && args != null){
+            return true;
+        }
+        else if (commandName.equals("help") && args == null){
+            return true;
+        }
+        else if (commandName.equals("echo") && args!= null){
+            return true;
+        }
+        //----------------------------------------------------------------
+        // Will Implement the rest here...
+        else return false;  // better to type return and the last condition...
     }
     //----------------------------------------------------------------------------------------------------------------------
     public String getCommandName(){
@@ -63,20 +92,28 @@ class Parser {
         return args;
     }
 //----------------------------------------------------------------------------------------------------------------------
+    public void setArgs(String[]args){
+        this.args = args;
+    }
+//----------------------------------------------------------------------------------------------------------------------
+    public String getInput() {
+    return input;
+    }
+    //----------------------------------------------------------------------------------------------------------------------
 
 }
 
 //======================================================================================================================
 
 public class Terminal {
-    Parser parser;
-    ArrayList<String> History = new ArrayList<>(); // Every correct command will be added to the history
-    static Scanner scanner = new Scanner (System.in);
-    static String input;
-    static Path currentPath = Paths.get(System.getProperty("user.dir"));
+    private Parser parser;
+    private ArrayList<String> History = new ArrayList<>(); // Every correct command will be added to the history
+    private static Scanner scanner = new Scanner (System.in);
+    private static String input;
+    private static Path currentPath = Paths.get(System.getProperty("user.dir"));
 
 
-    //----------------------------------------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------------------------------
     public String pwd(){
         return System.getProperty("user.dir");
     }
@@ -92,7 +129,7 @@ public class Terminal {
                 if(currentPath.getParent() != null){
                     currentPath = currentPath.getParent();
                 }
-                this.parser.args = null;
+                this.parser.setArgs(null);
                 return;
             }
             Path path = Paths.get(args[0]);
@@ -109,10 +146,10 @@ public class Terminal {
                 System.out.println("Invalid directory");
             }
         }
-        this.parser.args = null;
+        this.parser.setArgs(null);
 
     }
-    //----------------------------------------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------------------------------
     public void cat(String filename) throws IOException {
         Path fullPath = currentPath.resolve(filename);
         if (Files.exists(fullPath)){
@@ -133,7 +170,7 @@ public class Terminal {
             System.out.println("No Such file in directory");
         }
     }
-    //----------------------------------------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------------------------------
     public void cat(String filename1, String filename2) throws IOException{
         Path fullPath1 = currentPath.resolve(filename1); // store the path of the first file
         Path fullPath2 = currentPath.resolve(filename2); // store the path of the second file
@@ -158,65 +195,171 @@ public class Terminal {
             System.out.println("No Such file in directory");
         }
     }
+//----------------------------------------------------------------------------------------------------------------------
+
+    public List<String> ls (){
+        File[] listOfFiles = currentPath.toFile().listFiles();  // get the list of files in the current directory.
+        List<String> filesName = new ArrayList<>(); // the list of files' names.
+
+        if (listOfFiles == null)
+        {
+            System.out.println("No files in directory");
+            return filesName;
+        }
+
+        if (parser.getArgs() != null) { // if the user wants ls -r .
+            Arrays.sort(listOfFiles, Collections.reverseOrder());   // reverse the list.
+        }
+
+        else Arrays.sort(listOfFiles);    // sort the list.
+
+        for (File listOfFile : Objects.requireNonNull(listOfFiles)) {
+            if (listOfFile.isFile()) {
+                filesName.add((listOfFile.getName()));  // add the file name to the list.
+            }
+        }
+        return filesName;
+    }
+
+//----------------------------------------------------------------------------------------------------------------------
+
+    public String wc (){
+
+        try {
+            int lineCount = 0;
+            int wordCount = 0;
+            int charCount = 0;
+
+            FileReader fileReader = new FileReader(parser.getArgs()[0]);    // get the file name.
+            BufferedReader bufferedReader = new BufferedReader(fileReader);
+
+            String line;
+
+            while ((line = bufferedReader.readLine()) != null) {
+                lineCount++; // Increment line count for each line in the file.
+
+                String[] words = line.split("\\s+"); // Split the line into words using spaces.
+                wordCount += words.length; // Increment word count for each word in the file.
+
+                charCount += line.length(); // Increment character count for the line (including spaces).
+            }
+
+            bufferedReader.close();
+            return (lineCount + " " + wordCount + " " + charCount + " " + Arrays.toString(parser.getArgs()));
+
+        } catch (IOException e) {
+            return "Invalid command";
+        }
+    }
+//----------------------------------------------------------------------------------------------------------------------
+public void touch() throws IOException {
+
+    String path = String.join(File.separator, parser.getArgs()); // Joining the args with the file separator.
+
+    File file = new File(path);
+
+    if (file.exists()) {    // Check if the file exists.
+        System.out.println("File already exists.");
+        return; // Exit method if the file already exists.
+    }
+
+    // check if the path is correct or no.
+    File parentDirectory = file.getParentFile();
+    if (parentDirectory != null && !parentDirectory.exists()) {
+        System.out.println("The system cannot find this path.");
+        return; // Exit method if the path is not found
+    }
+
+    // Try to create the file.
+    if (file.createNewFile()) {
+        System.out.println("File created successfully.");
+    }
+    else {
+        System.out.println("Failed to create the file.");
+    }
+}
+//----------------------------------------------------------------------------------------------------------------------
+    public String echo (){    // just print the input.
+        String output = Arrays.toString(parser.getArgs());
+        return output.replaceAll("[\\[\\]]", "");
+    }
+
+//----------------------------------------------------------------------------------------------------------------------
+
+    public String help (){
+        return """
+                echo    Takes 1 argument and prints it.
+                pwd     Takes no arguments and prints the current path.
+                cd      Change the directory.
+                ls      Lists the contents of the current directory sorted alphabetically.
+                ls -r   Lists the contents of the current directory in reverse order.
+                mkdir   Creates a new directory.
+                rmdir   Remove a directory.
+                touch   Create a new file.
+                cp      Copy from a file to a file.
+                cp -r   Copy from a directory to a directory.
+                rm      Removes a file.
+                cat     Takes 1 argument and prints the file’s content or takes 2 arguments and concatenates the content of the 2 files and prints it.
+                wc      Used for counting processes of the file.
+                history Displays an enumerated list with the commands you’ve used in the past.
+                exit    Exit the program.
+                """;
+    }
+//----------------------------------------------------------------------------------------------------------------------
+
+
     // This method will choose the suitable command method to be called
     public void chooseCommandAction() throws IOException {
 
+        System.out.println(currentPath);
         while (true) {
             parser = new Parser();
-            System.out.print(currentPath+"\n>");
+            System.out.print(">");
             input = scanner.nextLine();
-
             if (parser.parse(input)) {
-                if (parser.getCommandName().equals("pwd")) {
-                    System.out.println(pwd());
-                    History.add("pwd"); // add that command to the history
-                }
-                else if (parser.getCommandName().equals("exit")) {
-                    System.exit(0);
-                    // add that command to the history
-                }
-                else if (parser.getCommandName().equals("history")){
-                    int counter = 1;
-                    for (String command : History){
-                        System.out.println(counter++ + " " + command);
+                History.add(parser.getInput());
+                switch (parser.getCommandName()) {
+                    case "help" -> System.out.println(help());
+                    case "echo" -> System.out.println(echo());
+                    case "pwd" -> System.out.println(pwd());
+                    case "cd" -> this.cd(parser.getArgs());
+                    case "ls" -> {
+                        for (String filename : ls()){
+                            System.out.println(filename);
+                        }
                     }
-                }
-                else if(parser.getCommandName().equals("cd"))
-                {
-                    this.cd(parser.getArgs());
-                }
-                else if (parser.getCommandName().equals("cat")){
-                    if (parser.getArgs().length == 1) {
-                        cat(parser.getArgs()[0]);
-                        History.add("cat "+parser.getArgs()[0]);
+                    case "touch" -> touch();
+                    case "cat" -> {
+                        if (parser.getArgs().length == 1) {
+                            cat(parser.getArgs()[0]);
+                            History.add("cat " + parser.getArgs()[0]);
+                        } else if (parser.getArgs().length == 2) {
+                            cat(parser.getArgs()[0], parser.getArgs()[1]);
+                        } else System.out.println("More than 2 parameters!");
                     }
-                    else if (parser.getArgs().length == 2) {
-                        cat(parser.getArgs()[0], parser.getArgs()[1]);
-                        History.add("cat "+parser.getArgs()[1] + ' ' + parser.getArgs()[1]);
+                    case "wc" -> System.out.println(wc());
+                    case "history" -> {
+                        int counter = 1;
+                        for (String command : History) {
+                            System.out.println(counter++ + " " + command);
+                        }
                     }
-                    else System.out.println("More than 2 parameters!");
+                    case "exit" -> System.exit(0);
                 }
-                else System.out.println("Invalid command");
             }
-            else {
-                System.out.println("Invalid command");
-            }
+            else System.out.println("Invalid command");
         }
 
         //________________________________________________________________
 
-//        // Getting the command name and its parameters.
-//        String commandName = parser.getCommandName();
-//        String [] args = parser.getArgs();
     }
 
 //----------------------------------------------------------------------------------------------------------------------
 
     public static void main(String[] args) throws IOException {
-//        // Call the function that will manage the Interpreter.
+//  Call the function that will manage the Interpreter.
         Terminal terminal = new Terminal ();
         terminal.chooseCommandAction();
-//        terminal.chooseCommandAction();
 
     }
 }
