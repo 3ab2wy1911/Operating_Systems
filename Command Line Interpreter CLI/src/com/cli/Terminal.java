@@ -63,8 +63,9 @@ class Parser {
         else if (commandName.equals("cat") && args != null){
             return true;
         }
-        else if (commandName.equals("ls")){
-            return Objects.requireNonNull(args).length <= 1;
+        else if (commandName.equals("ls") ){
+            if (args == null)   return true;
+            else return args.length == 1 && args[0].equals("-r");
         }
         else if (commandName.equals("touch") && args != null){
             return true;
