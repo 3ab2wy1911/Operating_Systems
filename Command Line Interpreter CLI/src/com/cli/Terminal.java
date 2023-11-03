@@ -99,13 +99,13 @@ class Parser {
     public String[] getArgs(){
         return args;
     }
-//----------------------------------------------------------------------------------------------------------------------
+    //----------------------------------------------------------------------------------------------------------------------
     public void setArgs(String[]args){
         this.args = args;
     }
-//----------------------------------------------------------------------------------------------------------------------
+    //----------------------------------------------------------------------------------------------------------------------
     public String getInput() {
-    return input;
+        return input;
     }
     //----------------------------------------------------------------------------------------------------------------------
 
@@ -114,7 +114,7 @@ class Parser {
 //======================================================================================================================
 
 public class Terminal {
-    private Parser parser;
+    private com.cli.Parser parser;
     private final ArrayList<String> History = new ArrayList<>(); // Every correct command will be added to the history
     private static final Scanner scanner = new Scanner (System.in);
     private static String input;
@@ -166,66 +166,84 @@ public class Terminal {
 
     }
 
-//----------------------------------------------------------------------------------------------------------------------
-
-    public static void ensureAbsolutePaths(Path filePath, String args) {
+    //----------------------------------------------------------------------------------------------------------------------
+    public static Path ensureAbsolutePaths(Path filePath, String args) {
         if (!filePath.isAbsolute()) {
             filePath = Paths.get(currentPath.toString(), args);
-     }
+        }
+        return filePath;
     }
 
-//----------------------------------------------------------------------------------------------------------------------
-public void cp(String[] args) throws IOException {
-    Path file1 =  Path.of(args[0]);
-    Path file2 = Path.of(args[1]);
-    ensureAbsolutePaths(file1, args[0]);
-    ensureAbsolutePaths(file2, args[1]);
-    try{
-        if(Files.exists(file1)) {
-            File file = new File(file2.toString());
-            file.createNewFile();
-            if(Files.exists(file2))
-            {
-                Files.copy(file1, file2, REPLACE_EXISTING);
+    //----------------------------------------------------------------------------------------------------------------------
+    public void cp(String[] args) throws IOException {
+        Path file1 =  Path.of(args[0]);
+        Path file2 = Path.of(args[1]);
+        file1 = ensureAbsolutePaths(file1, args[0]);
+        file2 = ensureAbsolutePaths(file2, args[1]);
+        try{
+            if(Files.exists(file1)) {
+                File file = new File(file2.toString());
+                file.createNewFile();
+                if(Files.exists(file2))
+                {
+                    Files.copy(file1, file2, REPLACE_EXISTING);
+                }
+                else {
+                    System.out.println("Enter a Valid Destination File Name");
+                }
+
             }
             else {
-                System.out.println("Enter a Valid Destination File Name");
+                System.out.println("Enter a Valid Source File Name");
             }
-
         }
-        else {
-            System.out.println("Enter a Valid Source File Name");
+        catch (IOException e)
+        {
+            System.out.println("Error in Copying File " + e);
         }
+        this.parser.setArgs(null);
     }
-    catch (IOException e)
-    {
-        System.out.println("Error in Copying File " + e);
-    }
-    this.parser.setArgs(null);
-}
 
 //----------------------------------------------------------------------------------------------------------------------
 
     public void cp_r(String[] args) {
         Path folder1 =  Path.of(args[1]);
         Path folder2 = Path.of(args[2]);
-        ensureAbsolutePaths(folder1, args[1]);
-        ensureAbsolutePaths(folder2, args[2]);
+        folder1 = ensureAbsolutePaths(folder1, args[1]);
+        folder2 = ensureAbsolutePaths(folder2, args[2]);
         try {
+            if(Files.exists(folder2))
+            {
+                Path FileName = folder1.getParent().relativize(folder1);
+
+                File newFile = new File(folder2.resolve(String.valueOf(FileName)).toString());
+                newFile.mkdir();
+
+                folder2 = folder2.resolve(String.valueOf(FileName));
+
+            }
+
+            Path finalFolder = folder2;
+            Path finalFolder1 = folder1;
             Files.walk(folder1).forEach(s->
                     {
                         try {
-                            Files.copy(s, folder2.resolve(folder1.relativize(s)), StandardCopyOption.REPLACE_EXISTING);
+
+                            Files.copy(s, finalFolder.resolve(finalFolder1.relativize(s)), REPLACE_EXISTING);
 
                         } catch (IOException e) {
                             System.out.println(e);
                         }
                     }
+
             );
         }catch (IOException e) {
             System.out.println(e);
         }
+        this.parser.setArgs(null);
     }
+
+
 
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -250,7 +268,7 @@ public void cp(String[] args) throws IOException {
             System.out.println("No Such file in directory");
         }
     }
-//----------------------------------------------------------------------------------------------------------------------
+    //----------------------------------------------------------------------------------------------------------------------
     public void cat(String filename1, String filename2) throws IOException{
         Path fullPath1 = currentPath.resolve(filename1); // store the path of the first file
         Path fullPath2 = currentPath.resolve(filename2); // store the path of the second file
@@ -331,34 +349,37 @@ public void cp(String[] args) throws IOException {
             return "Invalid command";
         }
     }
-//----------------------------------------------------------------------------------------------------------------------
-public void touch() throws IOException {
+    //----------------------------------------------------------------------------------------------------------------------
+    public void touch() throws IOException {
 
-    String path = String.join(File.separator, parser.getArgs()); // Joining the args with the file separator.
+        String path = String.join(File.separator, parser.getArgs()); // Joining the args with the file separator.
 
-    File file = new File(path);
+        File file = new File(path);
 
-    if (file.exists()) {    // Check if the file exists.
-        System.out.println("File already exists.");
-        return; // Exit method if the file already exists.
+        try {
+            if (file.exists()) {    // Check if the file exists.
+                System.out.println("File already exists.");
+                return; // Exit method if the file already exists.
+            }
+
+            // check if the path is correct or no.
+            File parentDirectory = file.getParentFile();
+            if (parentDirectory != null && !parentDirectory.exists()) {
+                System.out.println("The system cannot find this path.");
+                return; // Exit method if the path is not found
+            }
+            // Try to create the file.
+            if (file.createNewFile()) {
+                System.out.println("File created successfully.");
+            }
+            else {
+                System.out.println("Failed to create the file.");
+            }
+        }catch (IOException e) {
+            System.out.println("Directory not found.");
+        }
     }
-
-    // check if the path is correct or no.
-    File parentDirectory = file.getParentFile();
-    if (parentDirectory != null && !parentDirectory.exists()) {
-        System.out.println("The system cannot find this path.");
-        return; // Exit method if the path is not found
-    }
-
-    // Try to create the file.
-    if (file.createNewFile()) {
-        System.out.println("File created successfully.");
-    }
-    else {
-        System.out.println("Failed to create the file.");
-    }
-}
-//----------------------------------------------------------------------------------------------------------------------
+    //----------------------------------------------------------------------------------------------------------------------
     public String echo (){    // just print the input.
         String output = Arrays.toString(parser.getArgs());
         return output.replaceAll("[\\[\\]]", "");
@@ -415,25 +436,25 @@ public void touch() throws IOException {
         }
     }
 
-//----------------------------------------------------------------------------------------------------------------------
+    //----------------------------------------------------------------------------------------------------------------------
     public void rmdir(){
         String path = String.join(" ", parser.getArgs()); // Joining the args with the file separator.
         File file = new File(path);
 
         if (path.equals("*"))
         {
-           File current = new File(".");
-           File[] files = current.listFiles();
+            File current = new File(".");
+            File[] files = current.listFiles();
 
-           if (files != null){
-               for (File f : files){
-                   if (f.isDirectory() && Objects.requireNonNull(f.list()).length == 0){
-                       if (f.delete()){
-                           System.out.println(f.getName() + " deleted successfully");
-                       }
-                   }
-               }
-           }
+            if (files != null){
+                for (File f : files){
+                    if (f.isDirectory() && Objects.requireNonNull(f.list()).length == 0){
+                        if (f.delete()){
+                            System.out.println(f.getName() + " deleted successfully");
+                        }
+                    }
+                }
+            }
         }
         else {
             if (!file.exists() || !file.isDirectory()){
@@ -490,9 +511,10 @@ public void touch() throws IOException {
     // This method will choose the suitable command method to be called
     public void chooseCommandAction() throws Exception {
 
-        System.out.println(currentPath);
+
         while (true) {
-            parser = new Parser();
+            System.out.print(currentPath);
+            parser = new com.cli.Parser();
             System.out.print(">");
             input = scanner.nextLine();
             if (parser.parse(input)) {
@@ -555,7 +577,7 @@ public void touch() throws IOException {
 
     public static void main(String[] args) throws Exception {
 //  Call the function that will manage the Interpreter.
-        Terminal terminal = new Terminal ();
+        com.cli.Terminal terminal = new com.cli.Terminal();
         terminal.chooseCommandAction();
 
     }
