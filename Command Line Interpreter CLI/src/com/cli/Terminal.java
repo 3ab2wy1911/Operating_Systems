@@ -55,7 +55,7 @@ class Parser {
         }
         else if(commandName.equals("cd"))
         {
-            return args != null;
+            return true;
         }
         else if(args == null && commandName.equals("history")){
             return true;
@@ -63,8 +63,8 @@ class Parser {
         else if (commandName.equals("cat") && args != null){
             return true;
         }
-        else if (commandName.equals("ls") &&( args == null || Objects.equals(args[0], "-r"))){
-            return true;
+        else if (commandName.equals("ls")){
+            return Objects.requireNonNull(args).length <= 1;
         }
         else if (commandName.equals("touch") && args != null){
             return true;
@@ -78,9 +78,10 @@ class Parser {
         else if (commandName.equals("echo") && args!= null){
             return true;
         }
-        else if(commandName.equals("cp") )
+        else if(commandName.equals("cp"))
         {
-            return args != null;
+
+            return Objects.requireNonNull(args).length >= 2 && Objects.requireNonNull(args).length <= 3;
         }
         else if (commandName.equals("mkdir") && args != null){
             return true;
@@ -133,6 +134,7 @@ public class Terminal {
         if(args==null || args.length ==0)
         {
             currentPath = Paths.get(System.getProperty("user.home"));
+            this.parser.setArgs(null);
             return;
         }
 
@@ -390,49 +392,51 @@ public class Terminal {
     public void makeDir(String[] arguments) throws IOException {
         // windows the absolute path starts with [partition letter][:][\]
         // linux the absolute path starts with '/'
-        boolean check = false;
-        Path newDirectory;
-        for (String directory : arguments){
+        try{
+            boolean check = false;
+            Path newDirectory;
+            for (String directory : arguments) {
 
-            if (Character.isLetter(directory.charAt(0)) && directory.charAt(1) == ':' && directory.charAt(2) == '\\'){
-                Path createAbs = currentPath.resolve(directory);
-                check = Paths.get(directory).isAbsolute();
-                if (check){
-                    newDirectory = Paths.get(directory);
-                    try{
-                        Files.createDirectory(newDirectory);
-                    }
-                    catch(IOException exception){
-                        System.out.println("Invalid Directory");
-                    }
-                }
-            }
-            else {
-                try {
-                    boolean flag = false;
-                    String str = "\\\\|*?\":<>|";
-                    for (int i = 0; i < directory.length(); i++){
-                        if (str.contains(String.valueOf(directory.charAt(i)))){
-                            flag = true;
-                        }
-                    }
-                    if (!flag) {
-                        newDirectory = currentPath.resolve(directory);
-                        if (Files.exists(newDirectory)) {
-                            throw new Exception(directory + " already exists");
-                        } else {
+                if (Character.isLetter(directory.charAt(0)) && directory.charAt(1) == ':' && directory.charAt(2) == '\\') {
+                    Path createAbs = currentPath.resolve(directory);
+                    check = Paths.get(directory).isAbsolute();
+                    if (check) {
+                        newDirectory = Paths.get(directory);
+                        try {
                             Files.createDirectory(newDirectory);
+                        } catch (IOException exception) {
+                            System.out.println("Invalid Directory");
                         }
-                    } else {
-                        throw new Exception("Not a valid name");
+                    }
+                } else {
+                    try {
+                        boolean flag = false;
+                        String str = "\\\\|*?\":<>|";
+                        for (int i = 0; i < directory.length(); i++) {
+                            if (str.contains(String.valueOf(directory.charAt(i)))) {
+                                flag = true;
+                            }
+                        }
+                        if (!flag) {
+                            newDirectory = currentPath.resolve(directory);
+                            if (Files.exists(newDirectory)) {
+                                throw new Exception(directory + " already exists");
+                            } else {
+                                Files.createDirectory(newDirectory);
+                            }
+                        } else {
+                            throw new Exception("Not a valid name");
+                        }
+
+                    } catch (Exception exception) {
+                        System.out.println(exception.getMessage());
                     }
 
                 }
-                catch (Exception exception){
-                    System.out.println(exception.getMessage());
-                }
-
             }
+        }catch (Exception e)
+        {
+            System.out.println(e);
         }
     }
 
@@ -458,7 +462,7 @@ public class Terminal {
         }
         else {
             if (!file.exists() || !file.isDirectory()){
-                System.out.println("Directory does not exist");
+                System.out.println("Invalid Command");
                 return;
             }
             if (file.delete()){
