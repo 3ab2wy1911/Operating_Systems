@@ -140,7 +140,6 @@ public class Terminal {
                 if(currentPath.getParent() != null){
                     currentPath = currentPath.getParent();
                 }
-//                this.parser.setArgs(null);
                 return;
             }
             Path path = Paths.get(String.join(File.separator, parser.getArgs()));
@@ -293,8 +292,8 @@ public void cp(String[] args) throws IOException {
         else Arrays.sort(listOfFiles);    // sort the list.
 
         for (File listOfFile : Objects.requireNonNull(listOfFiles)) {
-            if (listOfFile.isFile()) {
-                filesName.add((listOfFile.getName()));  // add the file name to the list.
+            if (listOfFile.isFile() || listOfFile.isDirectory()) {
+                filesName.add((listOfFile.getName()));  // add the file or the directory name to the list.
             }
         }
         return filesName;
@@ -309,7 +308,7 @@ public void cp(String[] args) throws IOException {
             int wordCount = 0;
             int charCount = 0;
 
-            FileReader fileReader = new FileReader(parser.getArgs()[0]);    // get the file name.
+            FileReader fileReader = new FileReader(String.join(" ", parser.getArgs()));    // get the file name.
             BufferedReader bufferedReader = new BufferedReader(fileReader);
 
             String line;
@@ -324,7 +323,7 @@ public void cp(String[] args) throws IOException {
             }
 
             bufferedReader.close();
-            return (lineCount + " " + wordCount + " " + charCount + " " + Arrays.toString(parser.getArgs()));
+            return (lineCount + " " + wordCount + " " + charCount + " " + String.join(" ", parser.getArgs()));
 
         } catch (IOException e) {
             return "Invalid command";
