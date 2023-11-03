@@ -8,6 +8,8 @@ import java.nio.file.*;
 import java.util.*;
 import java.util.ArrayList;
 import java.util.Scanner;
+import java.util.regex.Pattern;
+
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
 /*
@@ -370,33 +372,40 @@ public void touch() throws IOException {
         boolean check = false;
         Path newDirectory;
         for (String directory : arguments){
-            char letter = directory.charAt(0);
-            // check if it absolute path
-            if (Character.isLetter(letter) && directory.charAt(1) == ':' && directory.charAt(2) == '\\'){
+
+            if (Character.isLetter(directory.charAt(0)) && directory.charAt(1) == ':' && directory.charAt(2) == '\\'){
+                Path createAbs = currentPath.resolve(directory);
                 check = Paths.get(directory).isAbsolute();
                 if (check){
                     newDirectory = Paths.get(directory);
                     try{
                         Files.createDirectory(newDirectory);
-                        break;
                     }
                     catch(IOException exception){
                         System.out.println("Invalid Directory");
-                        return;
                     }
                 }
             }
             else {
                 try {
-                    String validation = "\\\\/:*?\"<>|";
-                    if (!directory.matches(".*[" + validation + "].*")){
-                        newDirectory = currentPath.resolve(directory);
-                        if (Files.exists(newDirectory)){
-                            throw new Exception(directory + " already exists");
+                    boolean flag = false;
+                    String str = "\\\\|*?\":<>|";
+                    for (int i = 0; i < directory.length(); i++){
+                        if (str.contains(String.valueOf(directory.charAt(i)))){
+                            flag = true;
                         }
-                        else Files.createDirectory(newDirectory);
                     }
-                    else throw new Exception("Not a valid name");
+                    if (!flag) {
+                        newDirectory = currentPath.resolve(directory);
+                        if (Files.exists(newDirectory)) {
+                            throw new Exception(directory + " already exists");
+                        } else {
+                            Files.createDirectory(newDirectory);
+                        }
+                    } else {
+                        throw new Exception("Not a valid name");
+                    }
+
                 }
                 catch (Exception exception){
                     System.out.println(exception.getMessage());
@@ -512,6 +521,7 @@ public void touch() throws IOException {
                     case "rm" -> {
                         if (parser.getArgs().length == 1){
                             remove(parser.getArgs()[0]);
+                            History.add("rm " + parser.getArgs()[0]);
                         }
                     }
                     case "cat" -> {
@@ -520,7 +530,9 @@ public void touch() throws IOException {
                             History.add("cat " + parser.getArgs()[0]);
                         } else if (parser.getArgs().length == 2) {
                             cat(parser.getArgs()[0], parser.getArgs()[1]);
+                            History.add("cat " + parser.getArgs()[0] + ' ' + parser.getArgs()[0]);
                         } else System.out.println("More than 2 parameters!");
+
                     }
                     case "wc" -> System.out.println(wc());
                     case "history" -> {
