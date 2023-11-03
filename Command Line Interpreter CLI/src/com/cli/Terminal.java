@@ -4,10 +4,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
+import java.nio.file.*;
 import java.util.*;
 import java.util.ArrayList;
 import java.util.Scanner;
@@ -56,10 +53,7 @@ class Parser {
         }
         else if(commandName.equals("cd"))
         {
-            if(args == null) {
-                return true;
-            }
-            else return args.length <= 1;
+            return args != null;
         }
         else if(args == null && commandName.equals("history")){
             return true;
@@ -82,13 +76,9 @@ class Parser {
         else if (commandName.equals("echo") && args!= null){
             return true;
         }
-        else if(commandName.equals("cp") && !Objects.requireNonNull(args)[0].equals("-r"))
+        else if(commandName.equals("cp") )
         {
-            return args.length == 2;
-        }
-        else if(commandName.equals("cp"))
-        {
-            return args.length == 3;
+            return args != null;
         }
         else if (commandName.equals("mkdir") && args != null){
             return true;
@@ -132,15 +122,16 @@ public class Terminal {
 //----------------------------------------------------------------------------------------------------------------------
 
     public String pwd(){
-        return System.getProperty(currentPath.toString());
+        return currentPath.toString();
     }
 
 //----------------------------------------------------------------------------------------------------------------------
 
     public void cd(String[] args){
-        if(args==null)
+        if(args==null || args.length ==0)
         {
-            currentPath = Path.of(System.getProperty("user.home"));
+            currentPath = Paths.get(System.getProperty("user.home"));
+            return;
         }
 
         else {
@@ -149,20 +140,24 @@ public class Terminal {
                 if(currentPath.getParent() != null){
                     currentPath = currentPath.getParent();
                 }
-                this.parser.setArgs(null);
+//                this.parser.setArgs(null);
                 return;
             }
-            Path path = Paths.get(args[0]);
+            Path path = Paths.get(String.join(File.separator, parser.getArgs()));
 
             if(!path.isAbsolute())
             {
                 path = Paths.get(currentPath.toString(), path.toString()).normalize();
             }
 
-            if(Files.exists(path)){
-                currentPath = path;
-            }
-            else {
+            try{
+                if(Files.exists(path)){
+                    currentPath = path;
+                }
+                else {
+                    System.out.println("Invalid directory");
+                }
+            } catch (InvalidPathException e) {
                 System.out.println("Invalid directory");
             }
         }
