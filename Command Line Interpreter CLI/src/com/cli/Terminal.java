@@ -336,25 +336,28 @@ public void touch() throws IOException {
 
     File file = new File(path);
 
-    if (file.exists()) {    // Check if the file exists.
-        System.out.println("File already exists.");
-        return; // Exit method if the file already exists.
-    }
+        try {
+            if (file.exists()) {    // Check if the file exists.
+            System.out.println("File already exists.");
+            return; // Exit method if the file already exists.
+            }
 
-    // check if the path is correct or no.
-    File parentDirectory = file.getParentFile();
-    if (parentDirectory != null && !parentDirectory.exists()) {
-        System.out.println("The system cannot find this path.");
-        return; // Exit method if the path is not found
-    }
-
-    // Try to create the file.
-    if (file.createNewFile()) {
-        System.out.println("File created successfully.");
-    }
-    else {
-        System.out.println("Failed to create the file.");
-    }
+            // check if the path is correct or no.
+            File parentDirectory = file.getParentFile();
+            if (parentDirectory != null && !parentDirectory.exists()) {
+                System.out.println("The system cannot find this path.");
+                return; // Exit method if the path is not found
+            }
+            // Try to create the file.
+            if (file.createNewFile()) {
+                System.out.println("File created successfully.");
+            }
+            else {
+                System.out.println("Failed to create the file.");
+            }
+    }catch (IOException e) {
+            System.out.println("Directory not found.");
+        }
 }
 //----------------------------------------------------------------------------------------------------------------------
     public String echo (){    // just print the input.
