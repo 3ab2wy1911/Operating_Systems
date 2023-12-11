@@ -1,6 +1,4 @@
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -31,7 +29,7 @@ class Semaphore{
         }
 
     }
-    synchronized void signal(Device d)
+    synchronized void signal()
     {
         value++;
         if (value <= 0)
@@ -68,7 +66,7 @@ class Router{
 
 
     void releaseConnection(Device device) throws InterruptedException {
-        semaphore.signal(device);
+        semaphore.signal();
         connections[device.connectionID-1] =  false;
         System.out.println("Connection " + device.connectionID + ": " + device.name + " logged out");
         Network.write("Connection " + device.connectionID + ": " + device.name + " logged out");
@@ -106,14 +104,14 @@ class Device extends Thread{
             sleep((long) (Math.random()* 1000));
             router.releaseConnection(this);
         }
-        catch(InterruptedException ex){
-
+        catch(InterruptedException ex) {
+            throw new RuntimeException(ex);
         }
     }
 }
 //----------------------------------------------------------------------------------------------------------------------
 class Network{
-    public static void main(String[] args) throws InterruptedException {
+    public static void main(String[] args) {
         int numOfConnections, numOfDevices;
         ArrayList<Device> devices = new ArrayList<>();
         System.out.println("What is the number of WI-FI Connections?");
@@ -132,9 +130,8 @@ class Network{
             Device device = new Device(name, type, router);
             devices.add(device);
         }
-        for (int i = 0 ; i < devices.size(); i++ )
-        {
-            devices.get(i).start();
+        for (Device device : devices) {
+            device.start();
         }
     }
     public static void write(String content){
