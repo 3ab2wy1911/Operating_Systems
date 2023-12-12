@@ -44,8 +44,14 @@ public class Main {
 
         //----------------------------------------------------------------
 
-        Scheduler scheduler1 = new SJF(processes);
-        scheduler1.run();
-        scheduler1.output();
+        // Scheduler scheduler1 = new SJF(processes);
+        // scheduler1.run();
+        // scheduler1.output();
+
+        //----------------------------------------------------------------
+        Scheduler scheduler2 = new SRTF(processes);
+        scheduler2.run();
+        scheduler2.output();
+
     }
 }
