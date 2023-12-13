@@ -9,7 +9,7 @@ public abstract class Scheduler {
     //----------------------------------------------------------------
 
     public Scheduler(List<Process> processes) {
-        this.processes = processes;
+        this.processes = new ArrayList<>(processes);
         this.newProcesses = new ArrayList<>();
     }
 

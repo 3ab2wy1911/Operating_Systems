@@ -87,6 +87,10 @@ public class Process {
         this.turnaroundTime = turnaroundTime;
     }
 
+    public void setPriority(int priority) {
+        this.priority = priority;
+    }
+
     public int getCurrentQuantumTime() {
         return currentQuantumTime;
     }
