@@ -1,22 +1,8 @@
-import java.util.Objects;
-import java.util.Random;
-
 public class Process {
     private String name;
     private String color;
     private int arrivalTime;
     private int burstTime;
-    private  int currentQuantumTime;
-
-    public int getAGFactor() {
-        return AGFactor;
-    }
-
-    public int getRandomNumber() {
-        return randomNumber;
-    }
-
-
     private int priority;
     private int AGFactor;
     private int randomNumber;
