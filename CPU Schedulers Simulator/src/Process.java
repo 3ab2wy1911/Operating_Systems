@@ -1,3 +1,5 @@
+import java.util.Objects;
+
 public class Process {
     private String name;
     private String color;
@@ -8,6 +10,7 @@ public class Process {
     private int randomNumber;
     private int waitingTime;
     private int turnaroundTime;
+    private int currentQuantumTime;
 
     //----------------------------------------------------------------
 
@@ -17,7 +20,7 @@ public class Process {
         this.arrivalTime = arrivalTime;
         this.burstTime = burstTime;
         this.priority = priority;
-        this.randomNumber =new Random().nextInt(20);
+        this.randomNumber = AGFactor;
         this.AGFactor = AGFactor;
         this.waitingTime = 0;
         this.turnaroundTime = 0;
@@ -88,6 +91,14 @@ public class Process {
         return currentQuantumTime;
     }
 
+    public int getAGFactor() {
+        return AGFactor;
+    }
+
+    public int getRandomNumber() {
+        return randomNumber;
+    }
+
     private int calculateAGFactor()
     {
         if(this.randomNumber < 10)
@@ -101,6 +112,7 @@ public class Process {
 
 
     }
+
 
 
 //----------------------------------------------------------------
