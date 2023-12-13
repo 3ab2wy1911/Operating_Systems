@@ -1,13 +1,8 @@
 import java.util.*;
 
-public class SJF extends Scheduler {
-    int contextTime;
-
-    //----------------------------------------------------------------
-
-    public SJF(List<Process> processes, int contextTime) {
+public class PriorityScheduler extends Scheduler{
+    public PriorityScheduler(List<Process> processes){
         super(processes);
-        this.contextTime = contextTime;
     }
 
     //----------------------------------------------------------------
@@ -15,7 +10,7 @@ public class SJF extends Scheduler {
     public void run() {
         // Ready Queue & Processes
         processes.sort(Comparator.comparingInt(Process::getArrivalTime));
-        List<Process> readyQueue = new LinkedList<>();
+        PriorityQueue<Process> readyQueue = new PriorityQueue<>(Comparator.comparingInt(Process::getPriority));
 
         int endTime = 0;
 
@@ -27,13 +22,12 @@ public class SJF extends Scheduler {
             }
 
             if (!readyQueue.isEmpty()) {
-                readyQueue.sort(Comparator.comparingInt(Process::getBurstTime));
 
-                Process process = readyQueue.remove(0);
+                Process process = Objects.requireNonNull(readyQueue.peek());
 
                 // Execute the process
                 endTime += process.getBurstTime();
-                endTime += contextTime;
+                Objects.requireNonNull(readyQueue.peek()).setPriority(readyQueue.peek().getPriority()-1);
 
                 // Update Waiting time and Turnaround time
                 process.setWaitingTime(endTime - process.getArrivalTime() - process.getBurstTime());    // A - S
@@ -52,13 +46,10 @@ public class SJF extends Scheduler {
         avgTurnAroundTime /= newProcesses.size();
     }
 
-    //----------------------------------------------------------------
     public void output() {
-        System.out.println("================================================");
-        System.out.println("SJF Output:");
+        System.out.println("\n\n================================================");
+        System.out.println("Priority Scheduler Output:");
+        System.out.println("________________________________________________________________");
         super.output();
     }
-
-    //----------------------------------------------------------------
-
 }
