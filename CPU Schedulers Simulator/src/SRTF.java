@@ -18,7 +18,7 @@ public class SRTF extends Scheduler {
         }
         while (true) {
             List<Process> tmpQueue = new LinkedList<>();
-            
+
             // Add processes to ready queue
             for (Process process : tmProcesses) {
                 if (process.getArrivalTime() <= clock) {
@@ -36,17 +36,24 @@ public class SRTF extends Scheduler {
             // setting waiting time for each process
             if (clock != 0 && readyQueue.get(clock - 1).getName() != readyQueue.get(clock).getName()) {
                 for (Process process : processes) {
+                    int tmp = 0;
                     if (readyQueue.get(clock).getName().equals(process.getName())) {
-                        process.setWaitingTime(clock - process.getArrivalTime());
-                        process.setArrivalTime(clock + 1);
+                        for (Process process2 : tmProcesses) {
+                            if (process2.getName().equals(process.getName())) {
+                                tmp = process.getBurstTime() - process2.getBurstTime();
+                                break;
+                            }
+                        }
+                        process.setWaitingTime(clock - process.getArrivalTime() - tmp);
+                        // process.setArrivalTime(clock + 1);
                     }
                 }
             }
             if (clock == 0) {
                 for (Process process : processes) {
                     if (readyQueue.get(clock).getName().equals(process.getName())) {
-                        process.setWaitingTime(clock - process.getArrivalTime());
-                        process.setArrivalTime(clock + 1);
+                        process.setWaitingTime(0);
+                        // process.setArrivalTime(clock + 1);
                     }
                 }
             }
