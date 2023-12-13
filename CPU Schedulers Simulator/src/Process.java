@@ -23,7 +23,7 @@ public class Process {
         this.randomNumber = AGFactor;
         this.AGFactor = AGFactor;
         this.waitingTime = 0;
-        this.turnaroundTime = 0;
+        this.turnaroundTime = burstTime;
     }
 
     //----------------------------------------------------------------
@@ -121,7 +121,9 @@ public class Process {
         this.arrivalTime = arrivalTime;
     }
 
-
+    public void updateTurnaround(int waitingTime){
+        this.turnaroundTime += waitingTime;
+    }
 
 //----------------------------------------------------------------
 }
