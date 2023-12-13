@@ -1,9 +1,13 @@
 import java.util.*;
 
 public class SJF extends Scheduler {
+    int contextTime;
 
-    public SJF(List<Process> processes) {
+    //----------------------------------------------------------------
+
+    public SJF(List<Process> processes, int contextTime) {
         super(processes);
+        this.contextTime = contextTime;
     }
 
     //----------------------------------------------------------------
@@ -29,10 +33,11 @@ public class SJF extends Scheduler {
 
                 // Execute the process
                 endTime += process.getBurstTime();
+                endTime += contextTime;
 
                 // Update Waiting time and Turnaround time
                 process.setWaitingTime(endTime - process.getArrivalTime() - process.getBurstTime());    // A - S
-                process.setTurnaroundTime(endTime + process.getArrivalTime()); // E - A
+                process.setTurnaroundTime(endTime - process.getArrivalTime()); // E - A
                 avgTurnAroundTime +=  process.getTurnaroundTime();
                 avgWaitingTime += process.getWaitingTime();
 
