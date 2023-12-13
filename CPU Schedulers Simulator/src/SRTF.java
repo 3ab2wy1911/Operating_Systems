@@ -11,35 +11,56 @@ public class SRTF extends Scheduler {
     public void run() {
         int clock = 0;
         List<Process> readyQueue = new LinkedList<>();
+        List<Process> tmProcesses = new LinkedList<>();
+        for (Process process : processes) {
+            tmProcesses.add(new Process(process.getName(), process.getColor(), process.getArrivalTime(),
+                    process.getBurstTime(), process.getPriority(), process.getAGFactor()));
+        }
         while (true) {
+            List<Process> tmpQueue = new LinkedList<>();
+            
             // Add processes to ready queue
-            for (Process process : processes) {
-                if (process.getArrivalTime() == clock) {
-                    readyQueue.add(process);
+            for (Process process : tmProcesses) {
+                if (process.getArrivalTime() <= clock) {
+                    tmpQueue.add(process);
                 }
             }
-
-            // Sort ready queue by burst time
-            Collections.sort(readyQueue, new Comparator<Process>() {
+            Collections.sort(tmpQueue, new Comparator<Process>() {
                 @Override
                 public int compare(Process p1, Process p2) {
                     return p1.getBurstTime() - p2.getBurstTime();
                 }
             });
+            readyQueue.add(tmpQueue.get(0));
 
-            // Run process
-            if (readyQueue.size() > 0) {
-                Process process = readyQueue.get(0);
-                process.setBurstTime(process.getBurstTime() - 1);
-                if (process.getBurstTime() == 0) {
-                    process.setTurnaroundTime(clock + 1 - process.getArrivalTime());
-                    readyQueue.remove(0);
+            // setting waiting time for each process
+            if (clock != 0 && readyQueue.get(clock - 1).getName() != readyQueue.get(clock).getName()) {
+                for (Process process : processes) {
+                    if (readyQueue.get(clock).getName().equals(process.getName())) {
+                        process.setWaitingTime(clock - process.getArrivalTime());
+                        process.setArrivalTime(clock + 1);
+                    }
+                }
+            }
+            if (clock == 0) {
+                for (Process process : processes) {
+                    if (readyQueue.get(clock).getName().equals(process.getName())) {
+                        process.setWaitingTime(clock - process.getArrivalTime());
+                        process.setArrivalTime(clock + 1);
+                    }
                 }
             }
 
-            // Increment waiting time for processes in ready queue
-            for (Process process : readyQueue) {
-                process.setWaitingTime(process.getWaitingTime() + 1);
+            // decrease burst time of the process by one
+            tmpQueue.get(0).setBurstTime(tmpQueue.get(0).getBurstTime() - 1);
+            if (tmpQueue.get(0).getBurstTime() == 0) {
+                for (Process process : tmProcesses) {
+                    if (process.getName() == tmpQueue.get(0).getName()) {
+                        tmProcesses.remove(process);
+                        break;
+                    }
+
+                }
             }
 
             // Increment clock
@@ -47,7 +68,7 @@ public class SRTF extends Scheduler {
 
             // Check if all processes are done
             boolean done = true;
-            for (Process process : processes) {
+            for (Process process : tmProcesses) {
                 if (process.getBurstTime() > 0) {
                     done = false;
                     break;
@@ -56,8 +77,21 @@ public class SRTF extends Scheduler {
             if (done) {
                 break;
             }
-            
         }
+
+        // Calculate turnaround times
+        for (Process process : processes) {
+            process.setTurnaroundTime(process.getBurstTime() + process.getWaitingTime());
+        }
+        // Calculate averages
+        for (Process process : processes) {
+            avgWaitingTime += process.getWaitingTime();
+            avgTurnAroundTime += process.getTurnaroundTime();
+            newProcesses.add(process);
+        }
+        avgWaitingTime /= newProcesses.size();
+        avgTurnAroundTime /= newProcesses.size();
+
     }
 
     // ----------------------------------------------------------------

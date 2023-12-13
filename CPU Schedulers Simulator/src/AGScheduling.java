@@ -83,7 +83,7 @@ public class AGScheduling extends Scheduler {
                 currentProcess = readyQueue.poll();
                 if(currentProcess == null)
                 {
-                  continue;
+                continue;
                 }
 
                 currentQuantumTime =  currentProcess.getCurrentQuantumTime();

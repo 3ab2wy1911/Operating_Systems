@@ -101,16 +101,20 @@ public class Process {
 
     private int calculateAGFactor()
     {
-        if(this.randomNumber < 10)
+        if (this.randomNumber < 10)
             return this.randomNumber + this.arrivalTime + this.burstTime;
 
-        else if(this.randomNumber > 10)
+        else if (this.randomNumber > 10)
             return 10 + this.arrivalTime + this.burstTime;
 
         else
             return this.priority + this.arrivalTime + this.burstTime;
 
+    }
 
+    public void setArrivalTime(int arrivalTime)
+    {
+        this.arrivalTime = arrivalTime;
     }
 
 
