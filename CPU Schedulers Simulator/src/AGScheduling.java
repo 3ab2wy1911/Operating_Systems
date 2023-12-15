@@ -52,6 +52,7 @@ public class AGScheduling extends Scheduler {
             {
                 if(currentProcess != null){
 //                    System.out.println(currentProcess.getName() + " running\n" + "intrupted By " + leastAGFactor().getName());
+                    QuantumUpdated.add(currentProcess.getCurrentQuantumTime());
                     updateQuantumAndBurst(currentProcess, currentQuantumTime);
                     endTimeProcesses.add(time);
                     newProcesses.add(currentProcess);
@@ -80,6 +81,8 @@ public class AGScheduling extends Scheduler {
 
 
                 if(newProcesses.getLast() != currentProcess) {
+
+                    QuantumUpdated.add(currentProcess.getCurrentQuantumTime());
                     newProcesses.add(currentProcess);
                     time += remainingBurstTime;
                     endTimeProcesses.add(time);
@@ -126,6 +129,7 @@ public class AGScheduling extends Scheduler {
 //                System.out.println(currentProcess.getName()+" running");
 //                System.out.println("Finish his quantum time " + currentProcess.getName());
 
+                QuantumUpdated.add(currentProcess.getCurrentQuantumTime());
                 updateQuantumAndBurst(currentProcess, (int) (Math.ceil(0.1 * meanOfProcesses())));
 
                 newProcesses.add(currentProcess);
