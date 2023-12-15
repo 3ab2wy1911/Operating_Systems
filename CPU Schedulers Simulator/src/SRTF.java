@@ -1,9 +1,11 @@
 import java.util.*;
 
 public class SRTF extends Scheduler {
+    List<Process> executionProcesses;
 
     public SRTF(List<Process> processes) {
         super(processes);
+        this.executionProcesses = new ArrayList<Process>();
     }
 
     // ----------------------------------------------------------------
@@ -97,16 +99,61 @@ public class SRTF extends Scheduler {
         }
         avgWaitingTime /= newProcesses.size();
         avgTurnAroundTime /= newProcesses.size();
+        List<Process> readyQueue2 = new ArrayList<>();
+        readyQueue2.addAll(readyQueue);
 
-        List<Process> readyQueue2 = new LinkedList<>();
+        Collections.reverse(readyQueue2);
+
+        for ( Process process : readyQueue2){
+
+            if (executionProcesses.isEmpty()) {
+                executionProcesses.add(process);
+                continue;
+            }
+            boolean flag = false;
+            for (Process p : executionProcesses) {
+                if (p.getName().equals(process.getName())) {
+                    flag = true;
+                    break;
+                }
+            }
+            if(!flag){
+                executionProcesses.add(process);
+            }
+        }
+        Collections.reverse(executionProcesses);
     }
 
     // ----------------------------------------------------------------
+    @Override
     public void output() {
-        System.out.println("================================================");
+        System.out.println("\n\n================================================");
         System.out.println("SRTF Output:");
-        super.output();
+        System.out.println("================================================");
+        System.out.println("Processes Execution Order:");
+        for (Process process : executionProcesses) {
+            System.out.println(process.getName());
+        }
+
+
+        System.out.println("----------------------------------------------------------------");
+
+        // Print waiting time and turnaround time for each process
+        System.out.println("Waiting Time and Turnaround Time for Each Process:");
+        for (Process process : newProcesses) {
+            System.out.println("----------------------------------------------------------------");
+            System.out.println("Process " + process.getName());
+            System.out.println("Waiting Time = " + process.getWaitingTime());
+            System.out.println("Turnaround Time = " + process.getTurnaroundTime());
+        }
+
+        System.out.println("----------------------------------------------------------------");
+
+        // Print average waiting time and average turnaround time
+        System.out.println("Average Waiting Time: " + avgWaitingTime);
+        System.out.println("Average Turnaround Time: " + avgTurnAroundTime);
     }
+
 
     // ----------------------------------------------------------------
 
