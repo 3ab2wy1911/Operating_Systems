@@ -30,21 +30,20 @@ public class SRTF extends Scheduler {
             Collections.sort(tmpQueue, new Comparator<Process>() {
                 @Override
                 public int compare(Process p1, Process p2) {
-                    return p1.getBurstTime() - p2.getBurstTime();
+                    return p1.getStarvationFactor() - p2.getStarvationFactor();
                 }
             });
             readyQueue.add(tmpQueue.get(0));
 
-            // Decrease biggest burst time by one
-            // if (clock % 25 == 0 && clock >= 25) {
-
-            //     for (Process process : processes) {
-            //         if (process.getName().equals(tmpQueue.get(tmpQueue.size() - 1).getName())) {
-            //             process.setBurstTime(process.getBurstTime() - 5);
-            //         }
-            //     }
-            // }
-            // tmpQueue.get(tmpQueue.size()-1).setBurstTime(tmpQueue.get(tmpQueue.size()-1).getBurstTime()-1);
+            // Decrease biggest burst time by five to solve starvation problem
+            if (clock % 60 == 0 && clock >= 60) {
+                for (Process process : processes) {
+                    if (process.getName().equals(tmpQueue.get(tmpQueue.size() - 1).getName())) {
+                        process.setStarvationFactor(process.getStarvationFactor() - 5);
+                        tmpQueue.get(tmpQueue.size() -1 ).setStarvationFactor(tmpQueue.get(tmpQueue.size() -1).getStarvationFactor() - 5);
+                    }
+                }
+            }
 
             // setting waiting time for each process
             if (clock != 0 && readyQueue.get(clock - 1).getName() != readyQueue.get(clock).getName()) {
@@ -73,6 +72,7 @@ public class SRTF extends Scheduler {
 
             // decrease burst time of the process by one
             tmpQueue.get(0).setBurstTime(tmpQueue.get(0).getBurstTime() - 1);
+            tmpQueue.get(0).setStarvationFactor(tmpQueue.get(0).getStarvationFactor() - 1);
             if (tmpQueue.get(0).getBurstTime() == 0) {
                 for (Process process : tmProcesses) {
                     if (process.getName() == tmpQueue.get(0).getName()) {

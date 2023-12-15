@@ -54,9 +54,9 @@ public class Main {
 
          //----------------------------------------------------------------
 
-          Scheduler  scheduler1 = new SJF(processes, contextSwitching);
-          scheduler1.run();
-          scheduler1.output();
+        //   Scheduler  scheduler1 = new SJF(processes, contextSwitching);
+        //   scheduler1.run();
+        //   scheduler1.output();
          //----------------------------------------------------------------
 
          Scheduler scheduler2 = new SRTF(processes);
@@ -71,9 +71,9 @@ public class Main {
 
         //----------------------------------------------------------------
         // to be added the function of scheduling...
-        Scheduler scheduler4 = new AGScheduling(processes, quantum); // just replace 4 with the quantum time
-        scheduler4.run();
-        scheduler4.outputFinalAg();
+        // Scheduler scheduler4 = new AGScheduling(processes, quantum); // just replace 4 with the quantum time
+        // // scheduler4.run();
+        // scheduler4.outputFinalAg();
 
         //----------------------------------------------------------------
 

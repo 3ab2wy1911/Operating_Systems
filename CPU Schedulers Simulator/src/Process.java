@@ -11,6 +11,7 @@ public class Process {
     private int waitingTime;
     private int turnaroundTime;
     private int currentQuantumTime;
+    private int starvationFactor;
 
     private int strTime;
 
@@ -34,6 +35,7 @@ public class Process {
         this.waitingTime = 0;
         this.turnaroundTime = burstTime;
         this.strTime = burstTime;
+        this.starvationFactor = burstTime;
 
     }
 
@@ -132,9 +134,18 @@ public class Process {
         this.arrivalTime = arrivalTime;
     }
 
-    public void updateTurnaround(int waitingTime){
+    public void updateTurnaround(int waitingTime) {
         this.turnaroundTime += waitingTime;
     }
+    
+    public void setStarvationFactor(int starvationFactor) {
+        this.starvationFactor = starvationFactor;
+    }
+
+    public int getStarvationFactor()
+    {
+        return this.starvationFactor;
+}
 
 //----------------------------------------------------------------
 }
