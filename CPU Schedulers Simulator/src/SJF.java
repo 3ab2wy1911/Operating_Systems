@@ -33,14 +33,15 @@ public class SJF extends Scheduler {
 
                 // Execute the process
                 int startTime = endTime;
-                endTime += contextTime;
+                endTime += process.getBurstTime();
 
                 // Update Waiting time and Turnaround time
-                process.setWaitingTime(startTime - process.getArrivalTime());    // A - S
+                process.setWaitingTime(startTime - process.getArrivalTime());    // S - A
                 process.setTurnaroundTime(endTime - startTime); // E - S
                 avgTurnAroundTime +=  process.getTurnaroundTime();
                 avgWaitingTime += process.getWaitingTime();
-                endTime += process.getBurstTime();
+                endTime += contextTime;
+
 
                 newProcesses.add(process);
 
