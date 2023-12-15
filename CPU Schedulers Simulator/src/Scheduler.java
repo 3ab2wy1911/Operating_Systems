@@ -46,7 +46,7 @@ public abstract class Scheduler {
         System.out.println("Average Waiting Time: " + avgWaitingTime);
         System.out.println("Average Turnaround Time: " + avgTurnAroundTime);
     }
-    public void outputFinalAg(){
+    public void outputFinalAg(){    // You were able to update the original fn in your code, dirty coder...
         System.out.println("Processes Execution Order:");
         for (Process process : newProcesses) {
             System.out.println(process.getName());

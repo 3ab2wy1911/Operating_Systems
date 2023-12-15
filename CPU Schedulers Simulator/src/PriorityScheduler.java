@@ -10,7 +10,7 @@ public class PriorityScheduler extends Scheduler{
     public void run() {
         // Ready Queue & Processes
         processes.sort(Comparator.comparingInt(Process::getArrivalTime));
-        Queue<Process> readyQueue = new PriorityQueue<>(Comparator.comparingInt(Process::getPriority));
+        List<Process> readyQueue = new LinkedList<>();
 
         int endTime = 0;
 
@@ -23,15 +23,21 @@ public class PriorityScheduler extends Scheduler{
 
             if (!readyQueue.isEmpty()) {
 
-                Process process = Objects.requireNonNull(readyQueue.peek());
+                readyQueue.sort(Comparator.comparingInt(Process::getPriority));
+                Process process = Objects.requireNonNull(readyQueue.remove(0));
 
                 // Execute the process
+                int startTime = endTime;
                 endTime += process.getBurstTime();
-                Objects.requireNonNull(readyQueue.peek()).setPriority(readyQueue.peek().getPriority()-1);
+
+                if (!readyQueue.isEmpty()){
+                    Objects.requireNonNull(readyQueue.get(readyQueue.size()-1)).setPriority(readyQueue.get(readyQueue.size()-1).getPriority()-1);
+                    readyQueue.sort(Comparator.comparingInt(Process::getPriority));
+                }
 
                 // Update Waiting time and Turnaround time
-                process.setWaitingTime(endTime - process.getArrivalTime() - process.getBurstTime());    // A - S
-                process.setTurnaroundTime(endTime - process.getArrivalTime()); // E - A
+                process.setWaitingTime(startTime - process.getArrivalTime());    // S - A
+                process.setTurnaroundTime(endTime - startTime); // E - S
                 avgTurnAroundTime +=  process.getTurnaroundTime();
                 avgWaitingTime += process.getWaitingTime();
 
