@@ -47,7 +47,9 @@ public abstract class Scheduler {
         System.out.println("Average Turnaround Time: " + avgTurnAroundTime);
     }
     public void outputFinalAg(){    // You were able to update the original fn in your code, dirty coder...
-        System.out.println("Processes Execution Order:");
+        System.out.println("AG Factor : ");
+        // To be done : history update of quantum time for each process , excution order.
+        System.out.println("Processes sequence aw ay 7aga Order:");   // to be renamed.
         for (Process process : newProcesses) {
             System.out.println(process.getName());
         }

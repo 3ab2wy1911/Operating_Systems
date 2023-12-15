@@ -2,7 +2,7 @@ import java.util.*;
 
 
 public class AGScheduling extends Scheduler {
-    private int quantumTime;
+    private final int quantumTime;
     private int start;
     private int remainingBurstTime; // for keeping track of the remaining burst
     private List<Integer> endTimeProcesses = new ArrayList<>();
@@ -13,9 +13,8 @@ public class AGScheduling extends Scheduler {
     public AGScheduling(List<Process> processes, int quantumTime) {
         super(processes);
         this.quantumTime = quantumTime;
-        for(int i = 0; i< processes.size();i++)
-        {
-            processes.get(i).setCurrentQuantumTime(quantumTime);
+        for (Process process : processes) {
+            process.setCurrentQuantumTime(quantumTime);
         }
     }
 
@@ -246,14 +245,14 @@ public class AGScheduling extends Scheduler {
         return waiting;
     }
     public double getAvgWaiting(List<Process> process){
-        int sum = 0;
+        double sum = 0;
         for (Process p : process){
             sum += p.getWaitingTime();
         }
         return sum / process.size();
     }
     public double getAvgTurnaround(List<Process> process){
-        int sum = 0;
+        double sum = 0;
         for (Process p : process){
             sum += p.getTurnaroundTime();
         }
