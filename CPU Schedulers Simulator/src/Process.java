@@ -12,7 +12,16 @@ public class Process {
     private int turnaroundTime;
     private int currentQuantumTime;
 
-    //----------------------------------------------------------------
+    private int strTime;
+
+    public int getStrTime() {
+        return strTime;
+    }
+
+    public void setStrTime(int strTime) {
+        this.strTime = strTime;
+    }
+//----------------------------------------------------------------
 
     public Process(String name, String color, int arrivalTime, int burstTime, int priority, int AGFactor) {
         this.name = name;
@@ -24,6 +33,8 @@ public class Process {
         this.AGFactor = AGFactor;
         this.waitingTime = 0;
         this.turnaroundTime = burstTime;
+        this.strTime = burstTime;
+
     }
 
     //----------------------------------------------------------------

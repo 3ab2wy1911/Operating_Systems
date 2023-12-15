@@ -35,6 +35,17 @@ public class SRTF extends Scheduler {
             });
             readyQueue.add(tmpQueue.get(0));
 
+            // Decrease biggest burst time by one
+            // if (clock % 25 == 0 && clock >= 25) {
+
+            //     for (Process process : processes) {
+            //         if (process.getName().equals(tmpQueue.get(tmpQueue.size() - 1).getName())) {
+            //             process.setBurstTime(process.getBurstTime() - 5);
+            //         }
+            //     }
+            // }
+            // tmpQueue.get(tmpQueue.size()-1).setBurstTime(tmpQueue.get(tmpQueue.size()-1).getBurstTime()-1);
+
             // setting waiting time for each process
             if (clock != 0 && readyQueue.get(clock - 1).getName() != readyQueue.get(clock).getName()) {
                 for (Process process : processes) {
@@ -104,7 +115,7 @@ public class SRTF extends Scheduler {
 
         Collections.reverse(readyQueue2);
 
-        for ( Process process : readyQueue2){
+        for (Process process : readyQueue2) {
 
             if (executionProcesses.isEmpty()) {
                 executionProcesses.add(process);
@@ -117,7 +128,7 @@ public class SRTF extends Scheduler {
                     break;
                 }
             }
-            if(!flag){
+            if (!flag) {
                 executionProcesses.add(process);
             }
         }
@@ -134,7 +145,6 @@ public class SRTF extends Scheduler {
         for (Process process : executionProcesses) {
             System.out.println(process.getName());
         }
-
 
         System.out.println("----------------------------------------------------------------");
 
@@ -153,7 +163,6 @@ public class SRTF extends Scheduler {
         System.out.println("Average Waiting Time: " + avgWaitingTime);
         System.out.println("Average Turnaround Time: " + avgTurnAroundTime);
     }
-
 
     // ----------------------------------------------------------------
 
