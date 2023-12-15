@@ -10,7 +10,7 @@ public class PriorityScheduler extends Scheduler{
     public void run() {
         // Ready Queue & Processes
         processes.sort(Comparator.comparingInt(Process::getArrivalTime));
-        PriorityQueue<Process> readyQueue = new PriorityQueue<>(Comparator.comparingInt(Process::getPriority));
+        Queue<Process> readyQueue = new PriorityQueue<>(Comparator.comparingInt(Process::getPriority));
 
         int endTime = 0;
 
