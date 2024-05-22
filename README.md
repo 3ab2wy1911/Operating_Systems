@@ -1,4 +1,4 @@
-# Operating Systems Project
+# Operating System
 
 Welcome to the Operating Systems Project repository. This project contains various components and simulations related to operating systems concepts.
 
